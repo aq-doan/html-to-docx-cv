@@ -4,9 +4,9 @@ Author your CV and cover letter as strict semantic HTML, preview them live in th
 browser, and export a pixel-faithful Word **.docx** — fully client-side. No server,
 no accounts, no API keys.
 
-Built for an **AI-first workflow**: one click assembles a complete prompt (template
-contract + your document + the job description) for Claude or any chat LLM; paste the
-returned HTML back and export a perfectly styled, tailored DOCX.
+Built for an **AI-first workflow**: import your existing Word CV once, then for every
+job application let Claude (or any chat LLM) tailor it — the app assembles the
+complete prompt, validates what the AI returns, and exports a perfectly styled DOCX.
 
 ## Setup
 
@@ -19,24 +19,49 @@ npm install
 npm run dev        # → http://localhost:3000
 ```
 
-## Usage
+## The AI tailoring workflow
 
-1. **Pick a tab** — CV or Cover Letter. Each is edited and saved (localStorage)
-   independently.
-2. **Start writing** — the editor opens with a placeholder template
-   (`Your Name`, `Company Name`, …). Replace the placeholders with your details,
-   click **Load sample** to see a fully written example document first, or click
-   **Import DOCX** to start from an existing Word CV (see below).
-3. **Watch the preview** — the right pane renders an approximate print view as you
-   type. The DOCX export is the ground truth; the preview is for orientation.
-4. **Fix validation issues** — the bar under the editor checks every change against
-   the template contract and lists exactly what's wrong (unknown tags, bad tab stops,
-   inline CSS, …).
-5. **Download DOCX** — exports a Word file named after the `<h1>` in your document
-   (e.g. `Jane Doe_CV.docx`).
+This is the main loop the app is built around: keep one base document, and have an
+AI produce a tailored version for every job you apply to — without ever fighting
+Word formatting by hand.
 
-Buttons: **Load sample** replaces the editor with the example document;
-**Reset template** restores the blank placeholder template.
+```
+your CV.docx ──1 Import DOCX──▶ editor ──2 Copy AI Prompt──▶ Claude / any chat LLM
+                                  ▲      (job URL + description + notes)   │
+                                  └────────3 paste tailored HTML back──────┘
+                                  4  validate → preview → Download DOCX
+```
+
+1. **Import your base Word document** — click **Import DOCX** and pick your current
+   CV (or cover letter). The app transcribes it into the template vocabulary
+   entirely in the browser; nothing is uploaded. No Word file yet? Start from
+   **Load sample** or the blank placeholder template instead.
+2. **Build the prompt** — click **Copy AI Prompt** and fill in the job ad URL, the
+   pasted job description, the company website, and any notes for the AI. **Copy
+   prompt** puts a complete, self-contained prompt on your clipboard: the template
+   contract, your current document, and the job details.
+3. **Let the AI tailor it** — paste the prompt into Claude or any chat LLM. The
+   prompt instructs the model to reorder, reweight, and reword your real content for
+   the target role — and forbids inventing employers, roles, dates, or metrics. It
+   replies with a single fenced `html` block in the template vocabulary. Paste that
+   back into the editor.
+4. **Check and export** — the live preview shows the result and the validation bar
+   flags anything that broke the contract. **Download DOCX** exports a Word file
+   named after the `<h1>` in your document (e.g. `Jane Doe_CV.docx`).
+
+Repeat steps 2–4 for every application; each tab (CV / Cover Letter) is edited and
+saved independently in localStorage, so your base documents persist between visits.
+
+## Editor basics
+
+- **Tabs** — CV and Cover Letter are separate documents with separate saved state.
+- **Live preview** — the right pane renders an approximate print view as you type.
+  The DOCX export is the ground truth; the preview is for orientation.
+- **Validation bar** — every change is checked against the template contract, and
+  the bar under the editor lists exactly what's wrong (unknown tags, bad tab stops,
+  inline CSS, …).
+- **Load sample** replaces the editor with a fully written example document;
+  **Reset template** restores the blank placeholder.
 
 ### Importing an existing Word CV
 
@@ -55,20 +80,6 @@ The mapping is heuristic and best-effort:
 - Blocks with no equivalent in the vocabulary (images, decorated tables, …) are
   skipped; the status bar tells you how many.
 - A round trip (Download DOCX → Import DOCX) of a contract-clean document is lossless.
-
-Importing is the natural entry point for the AI workflow: import your current CV,
-then use **Copy AI Prompt** to tailor it to a job description.
-
-### Tailoring with AI
-
-1. Click **Copy AI Prompt**, paste the job description (and optionally the job ad URL,
-   company site, notes), then **Copy prompt**.
-2. Paste the prompt into Claude (or any chat LLM). It replies with a single fenced
-   `html` block.
-3. Paste that HTML back into the editor. The validator flags any contract violations;
-   the prompt forbids the model from inventing facts — it may only reweight, reorder,
-   and reword your real content.
-4. **Download DOCX.**
 
 ### Writing documents by hand
 
