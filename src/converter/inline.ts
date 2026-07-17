@@ -60,8 +60,9 @@ function collectAtoms(node: Node, style: RunStyle, link: string | undefined, out
 }
 
 /**
- * Whitespace normalization the way a browser renders it: trim the sequence
- * edges, and collapse whitespace that straddles atom boundaries (e.g.
+ * Boundary half of browser-style whitespace normalization (collectAtoms
+ * already collapses runs within a text node): trim the sequence edges, and
+ * collapse whitespace that straddles atom boundaries (e.g.
  * "<strong>foo </strong> bar" is one space, not two) or follows a <br>.
  */
 function normalizeAtoms(atoms: Atom[]): Atom[] {
