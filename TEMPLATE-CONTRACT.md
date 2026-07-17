@@ -51,15 +51,16 @@ Bold 12pt CAPS with a thin full-width rule underneath (Word paragraph bottom bor
 One bold line whose parts are separated by Word tab stops — used for
 role / employer / dates lines and project-title / client lines.
 
-- `data-tabs` is a comma-separated list of tab stops. Each stop is `position` or
-  `position:right` (right-aligned stop). Positions are twips from the left margin.
+- `data-tabs` is a comma-separated list of tab stops. Each stop is `position`,
+  `position:center`, or `position:right`. Positions are twips from the left margin.
 - The paragraph must contain exactly **one more `<span>` than there are tab stops**
   (N stops separate N+1 spans).
-- Use `10800:right` as the final stop when the last part (dates, client name) should be
-  flush with the right margin.
+- **Three-part lines (role / employer / dates) must use** `5400:center,10800:right` —
+  the employer is centered on the page and the dates end flush right.
+- Two-part lines use `10800:right` alone.
 
 ```html
-<p class="entry" data-tabs="4140,10800:right"><span>Role Title</span><span>Employer</span><span>May 2024 – Present</span></p>
+<p class="entry" data-tabs="5400:center,10800:right"><span>Role Title</span><span>Employer</span><span>May 2024 – Present</span></p>
 <p class="entry" data-tabs="10800:right"><span>Project Name</span><span>Client</span></p>
 ```
 

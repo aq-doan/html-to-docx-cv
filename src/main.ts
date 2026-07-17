@@ -1,6 +1,8 @@
 /** App wiring: tabs ↔ editor ↔ preview ↔ validation ↔ export ↔ prompt pack. */
 import cvTemplate from './templates/cv.html?raw';
 import coverLetterTemplate from './templates/cover-letter.html?raw';
+import sampleCv from './templates/sample-cv.html?raw';
+import sampleCoverLetter from './templates/sample-cover-letter.html?raw';
 import { createEditor, type Editor } from './editor';
 import { fitPreview, renderPreview } from './preview';
 import { validate } from './validate';
@@ -9,10 +11,16 @@ import { buildPrompt } from './prompt-pack';
 
 type DocId = 'cv' | 'cover-letter';
 
-const DOCS: Record<DocId, { label: string; template: string; filename: string }> = {
-  cv: { label: 'CV', template: cvTemplate, filename: 'Anh Quan Doan_CV.docx' },
-  'cover-letter': { label: 'Cover Letter', template: coverLetterTemplate, filename: 'Anh Quan Doan_Cover Letter.docx' },
+const DOCS: Record<DocId, { label: string; template: string; sample: string; suffix: string }> = {
+  cv: { label: 'CV', template: cvTemplate, sample: sampleCv, suffix: 'CV' },
+  'cover-letter': { label: 'Cover Letter', template: coverLetterTemplate, sample: sampleCoverLetter, suffix: 'Cover Letter' },
 };
+
+/** Download filename from the document's <h1> name, e.g. "Jane Doe_CV.docx". */
+function docxFilename(html: string, suffix: string): string {
+  const name = new DOMParser().parseFromString(html, 'text/html').querySelector('h1')?.textContent?.trim();
+  return `${name ? `${name}_` : ''}${suffix}.docx`;
+}
 
 const storageKey = (id: DocId) => `cv-docx-studio:${id}`;
 const load = (id: DocId) => localStorage.getItem(storageKey(id)) ?? DOCS[id].template;
@@ -68,12 +76,18 @@ $('#btn-download').addEventListener('click', async () => {
   if (errors.length > 0 && !confirm(`${errors.length} contract error(s) — unknown constructs are dropped from the export. Download anyway?`)) {
     return;
   }
-  await downloadDocx(html, DOCS[active].filename);
+  await downloadDocx(html, docxFilename(html, DOCS[active].suffix));
 });
 
 $('#btn-reset').addEventListener('click', () => {
-  if (confirm(`Replace the current ${DOCS[active].label} with the base template? Your edits will be lost.`)) {
+  if (confirm(`Replace the current ${DOCS[active].label} with the blank placeholder template? Your edits will be lost.`)) {
     editor.setValue(DOCS[active].template);
+  }
+});
+
+$('#btn-sample').addEventListener('click', () => {
+  if (confirm(`Replace the current ${DOCS[active].label} with the filled-in sample document? Your edits will be lost.`)) {
+    editor.setValue(DOCS[active].sample);
   }
 });
 
