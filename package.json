@@ -1,0 +1,23 @@
+{
+  "name": "cv-docx-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "HTML → DOCX CV & cover letter studio with pixel-exact Word styling and an AI tailoring prompt pack",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "check": "tsc --noEmit",
+    "fidelity": "node scripts/fidelity-check.mjs"
+  },
+  "dependencies": {
+    "@codemirror/lang-html": "^6.4.9",
+    "codemirror": "^6.0.1",
+    "docx": "^9.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  }
+}

@@ -1,0 +1,56 @@
+/*
+ * Print-like preview stylesheet, injected into the preview iframe.
+ * Mirrors the template vocabulary; the DOCX export is the ground truth —
+ * tab stops are approximated with flex layout here.
+ */
+html { background: #52565c; }
+body {
+  margin: 0 auto;
+  padding: 0.5in;
+  width: 8.5in;
+  min-height: 11in;
+  box-sizing: border-box;
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+  font-family: Calibri, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.08;
+  color: #000;
+}
+
+p, h1, h2, ul { margin: 0; }
+p { margin-bottom: 0; min-height: 1.08em; }
+
+/* Document header: name left, contacts right */
+header.cv-header { display: flex; align-items: flex-start; margin-bottom: 0.15em; }
+header.cv-header h1 { flex: 1; font-size: 28pt; font-weight: normal; line-height: 1.05; }
+header.cv-header .contact { flex: 1; text-align: right; }
+
+/* Section heading: bold 12pt with bottom rule */
+h2 {
+  font-size: 12pt;
+  font-weight: bold;
+  border-bottom: 0.75pt solid #000;
+  padding-bottom: 1px;
+  margin-top: 0.2em;
+}
+
+/* Entry line: bold, tab-separated parts approximated with flex */
+p.entry { font-weight: bold; }
+p.entry[data-tabs] { display: flex; }
+p.entry[data-tabs] span { flex: 1 1 0; }
+p.entry[data-tabs] span:last-child { text-align: right; flex: 0 0 auto; }
+p.entry[data-tabs] span:first-child { text-align: left; }
+
+/* Bullets: dot at 0.25in-ish, tight spacing */
+ul { padding-left: 0.5in; list-style: disc; }
+li { padding-left: 0; }
+
+/* Skill grids: proportional columns (grid-template set by preview.ts from data-widths) */
+div.grid { display: grid; column-gap: 0.08in; }
+div.grid ul { padding-left: 0.35in; }
+
+p.right { text-align: right; }
+p.spacer { min-height: 1.08em; }
+
+a { color: #0563c1; text-decoration: underline; }
