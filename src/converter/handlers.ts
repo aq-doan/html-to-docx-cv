@@ -20,7 +20,7 @@ import {
   type ISpacingProperties,
   type ParagraphChild,
 } from 'docx';
-import { CONTENT_WIDTH, HEADER_COLS, HEADING_BORDER, LIST, SIZE } from './constants';
+import { CONTENT_WIDTH, HEADER_COLS, HEADING_BORDER, LIST, SIZE, TABLE_SPACING } from './constants';
 import { inlineRuns } from './inline';
 
 export type Block = Paragraph | Table;
@@ -62,9 +62,12 @@ function handleHeader(el: Element): Block[] {
   const h1 = el.querySelector('h1');
   const contactPs = el.querySelectorAll('.contact p');
 
+  // Table paragraphs take the TableGrid-style spacing (after 0, single line).
+  const tableSpacing = { after: TABLE_SPACING.AFTER, line: TABLE_SPACING.LINE, lineRule: LineRuleType.AUTO };
+
   const namePara = new Paragraph({
     children: h1 ? inlineRuns(h1, { size: SIZE.NAME }) : [],
-    // Name inherits default spacing (after 160 / line 259) like the reference.
+    spacing: tableSpacing,
   });
 
   const contactParas = [...contactPs].map(
@@ -72,6 +75,7 @@ function handleHeader(el: Element): Block[] {
       new Paragraph({
         alignment: AlignmentType.RIGHT,
         children: inlineRuns(p),
+        spacing: tableSpacing,
       }),
   );
 
@@ -152,19 +156,21 @@ function handleEntry(el: Element): Block[] {
 }
 
 /** <li> → ListParagraph bullet (Symbol •, text at 0.25in, spacing after 0). */
-function bulletParagraph(li: Element, listEl: Element): Paragraph {
+function bulletParagraph(li: Element, listEl: Element, inTable = false): Paragraph {
   return new Paragraph({
     style: 'ListParagraph',
     numbering: { reference: 'cv-bullet', level: 0 },
     indent: { left: LIST.PARA_LEFT },
-    spacing: tightSpacing(listEl),
+    spacing: inTable
+      ? { after: TABLE_SPACING.AFTER, line: TABLE_SPACING.LINE, lineRule: LineRuleType.AUTO }
+      : tightSpacing(listEl),
     children: inlineRuns(li),
   });
 }
 
 /** <ul> → sequence of bullet paragraphs. */
-function handleUl(el: Element): Block[] {
-  return [...el.children].filter((c) => c.tagName === 'LI').map((li) => bulletParagraph(li, el));
+function handleUl(el: Element, inTable = false): Block[] {
+  return [...el.children].filter((c) => c.tagName === 'LI').map((li) => bulletParagraph(li, el, inTable));
 }
 
 /**
@@ -194,7 +200,7 @@ function handleGrid(el: Element): Block[] {
             (ul, i) =>
               new TableCell({
                 width: { size: widths[i] ?? widths[widths.length - 1], type: WidthType.DXA },
-                children: handleUl(ul) as Paragraph[],
+                children: handleUl(ul, true) as Paragraph[],
               }),
           ),
         }),

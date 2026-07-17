@@ -60,8 +60,9 @@ for (const side of ['top', 'right', 'bottom', 'left']) {
 }
 
 console.log('\n— Section heading rules (paragraph bottom borders) —');
-const refBorders = all(ref.document, /<w:bottom w:val="single" w:sz="(\d+)"[^>]*\/><\/w:pBdr>/g);
-const genBorders = all(gen.document, /<w:bottom w:val="single" w:sz="(\d+)"[^>]*\/><\/w:pBdr>/g);
+const borderRe = /<w:pBdr><w:bottom w:val="single"[^>]*w:sz="(\d+)"[^>]*\/><\/w:pBdr>/g;
+const refBorders = all(ref.document, borderRe);
+const genBorders = all(gen.document, borderRe);
 check('bordered-heading count', refBorders.length, genBorders.length);
 check('border sz values', [...new Set(refBorders)].join(','), [...new Set(genBorders)].join(','));
 
@@ -86,7 +87,9 @@ console.log(`  · distinct stop positions: reference=[${tabPositions(ref.documen
 console.log('    (generated uses cleaned right-aligned stops instead of the reference’s tab+space alignment hacks — visual parity is the goal)');
 
 console.log('\n— Fonts & default spacing —');
-check('default font', first(ref.styles, /<w:rFonts w:asciiTheme="minorHAnsi"|<w:rFonts w:ascii="(Calibri)"/) || 'Calibri(theme)', first(gen.styles, /<w:rFonts w:ascii="(Calibri)"/));
+// Reference uses theme fonts (minorHAnsi → Calibri); generated names Calibri directly. Same rendered font.
+const refUsesCalibri = /w:asciiTheme="minorHAnsi"/.test(ref.styles) || /w:ascii="Calibri"/.test(ref.styles);
+check('default font is Calibri', refUsesCalibri ? 'Calibri' : '(other)', first(gen.styles, /<w:rFonts w:ascii="(Calibri)"/));
 check('heading size (half-points)', '24', first(gen.document, /<w:b\/><w:sz w:val="(\d+)"\/>/) === '(missing)' ? first(gen.document, /<w:sz w:val="(24)"\/>/) : first(gen.document, /<w:b\/><w:sz w:val="(\d+)"\/>/));
 check('name size present (56)', /w:val="56"/.test(ref.document), /w:val="56"/.test(gen.document));
 check('hyperlink color', first(ref.styles, /<w:color w:val="(0563C1)"/), first(gen.styles, /<w:color w:val="(0563C1)"/));

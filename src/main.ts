@@ -2,7 +2,7 @@
 import cvTemplate from './templates/cv.html?raw';
 import coverLetterTemplate from './templates/cover-letter.html?raw';
 import { createEditor, type Editor } from './editor';
-import { renderPreview } from './preview';
+import { fitPreview, renderPreview } from './preview';
 import { validate } from './validate';
 import { downloadDocx } from './converter';
 import { buildPrompt } from './prompt-pack';
@@ -56,6 +56,7 @@ function switchTo(id: DocId): void {
 }
 
 editor = createEditor($('#editor-host'), load(active), refresh);
+fitPreview(preview, $('#preview-pane'));
 refresh(editor.getValue());
 
 tabButtons.cv.addEventListener('click', () => switchTo('cv'));

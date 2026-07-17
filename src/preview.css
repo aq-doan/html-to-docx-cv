@@ -21,10 +21,11 @@ body {
 p, h1, h2, ul { margin: 0; }
 p { margin-bottom: 0; min-height: 1.08em; }
 
-/* Document header: name left, contacts right */
-header.cv-header { display: flex; align-items: flex-start; margin-bottom: 0.15em; }
-header.cv-header h1 { flex: 1; font-size: 28pt; font-weight: normal; line-height: 1.05; }
+/* Document header: name left (baseline near the block's bottom), contacts right */
+header.cv-header { display: flex; align-items: flex-end; margin-bottom: 0.15em; }
+header.cv-header h1 { flex: 1; font-size: 28pt; font-weight: normal; line-height: 1; }
 header.cv-header .contact { flex: 1; text-align: right; }
+header.cv-header .contact p { line-height: 1.1; min-height: 0; }
 
 /* Section heading: bold 12pt with bottom rule */
 h2 {
@@ -35,20 +36,18 @@ h2 {
   margin-top: 0.2em;
 }
 
-/* Entry line: bold, tab-separated parts approximated with flex */
+/* Entry line: bold; tab stops become grid columns (set inline by preview.ts) */
 p.entry { font-weight: bold; }
-p.entry[data-tabs] { display: flex; }
-p.entry[data-tabs] span { flex: 1 1 0; }
-p.entry[data-tabs] span:last-child { text-align: right; flex: 0 0 auto; }
-p.entry[data-tabs] span:first-child { text-align: left; }
+p.entry[data-tabs] span { min-width: 0; white-space: nowrap; }
 
-/* Bullets: dot at 0.25in-ish, tight spacing */
-ul { padding-left: 0.5in; list-style: disc; }
-li { padding-left: 0; }
+/* Bullets: dot at 0.25in-ish, Word-like breathing room */
+ul { padding-left: 0.5in; list-style: disc; margin: 0.06em 0; }
+li { padding-left: 0.04in; margin-bottom: 0.09em; line-height: 1.15; }
 
 /* Skill grids: proportional columns (grid-template set by preview.ts from data-widths) */
 div.grid { display: grid; column-gap: 0.08in; }
 div.grid ul { padding-left: 0.35in; }
+div.grid li { line-height: 1.1; margin-bottom: 0.03em; }
 
 p.right { text-align: right; }
 p.spacer { min-height: 1.08em; }

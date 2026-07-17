@@ -27,6 +27,12 @@ export const SIZE = {
 /** Word docDefaults from the reference: spacing after 160, line 259 auto. */
 export const DEFAULT_SPACING = { AFTER: 160, LINE: 259 } as const;
 
+/**
+ * The reference's tables use the TableGrid style whose paragraph properties are
+ * spacing after=0 line=240 — header contacts and grid bullets are single-spaced.
+ */
+export const TABLE_SPACING = { AFTER: 0, LINE: 240 } as const;
+
 /** Section heading underline rule: <w:bottom w:val="single" w:sz="4" w:space="1"/> */
 export const HEADING_BORDER = { SIZE: 4, SPACE: 1 } as const;
 

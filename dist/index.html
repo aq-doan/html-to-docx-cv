@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV DOCX Studio</title>
+  <style>
+    :root {
+      --bg: #1e2126; --panel: #262a31; --border: #3a3f48; --text: #e6e8eb;
+      --muted: #9aa1ab; --accent: #4d9fff; --error: #ff6b6b; --warn: #ffb454; --ok: #5fd38a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font: 14px/1.4 -apple-system, 'Segoe UI', sans-serif; }
+    header.app { display: flex; align-items: center; gap: 16px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--border); }
+    header.app h1 { font-size: 15px; margin: 0 8px 0 0; font-weight: 600; }
+    .tabs { display: flex; gap: 4px; }
+    .tabs button { background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .toolbar { margin-left: auto; display: flex; gap: 8px; }
+    .toolbar button { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .toolbar button:hover { border-color: var(--accent); }
+    .toolbar button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    main { flex: 1; display: flex; min-height: 0; }
+    #editor-pane { width: 46%; min-width: 320px; border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    #editor-host { flex: 1; overflow: auto; }
+    #editor-host .cm-editor { height: 100%; font-size: 12.5px; }
+    #preview-pane { flex: 1; display: flex; min-width: 0; overflow: hidden; background: #52565c; }
+    #preview { flex: 1; border: 0; background: #52565c; }
+    #status { padding: 6px 14px; border-top: 1px solid var(--border); background: var(--panel); max-height: 160px; overflow-y: auto; font-size: 12.5px; }
+    #status .ok { color: var(--ok); }
+    #status .issue.error { color: var(--error); }
+    #status .issue.warning { color: var(--warn); }
+    #status .issue { display: block; margin: 1px 0; }
+    dialog { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 18px; width: min(560px, 90vw); }
+    dialog::backdrop { background: rgba(0,0,0,0.55); }
+    dialog h2 { margin: 0 0 4px; font-size: 15px; }
+    dialog p.hint { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
+    dialog label { display: block; font-size: 12.5px; color: var(--muted); margin: 10px 0 3px; }
+    dialog input, dialog textarea { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; font: inherit; }
+    dialog textarea { min-height: 90px; resize: vertical; }
+    dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    dialog .actions button { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+    dialog .actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  </style>
+  <script type="module" crossorigin src="/assets/index-DN45Lvb8.js"></script>
+</head>
+<body>
+  <header class="app">
+    <h1>CV DOCX Studio</h1>
+    <nav class="tabs">
+      <button id="tab-cv" class="active">CV</button>
+      <button id="tab-cover-letter">Cover Letter</button>
+    </nav>
+    <div class="toolbar">
+      <button id="btn-prompt">Copy AI Prompt</button>
+      <button id="btn-reset">Reset to base</button>
+      <button id="btn-download" class="primary">Download DOCX</button>
+    </div>
+  </header>
+  <main>
+    <section id="editor-pane">
+      <div id="editor-host"></div>
+      <div id="status"><span class="ok">Ready.</span></div>
+    </section>
+    <section id="preview-pane">
+      <iframe id="preview" sandbox="allow-same-origin" title="Document preview"></iframe>
+    </section>
+  </main>
+
+  <dialog id="prompt-dialog">
+    <h2>Copy AI Prompt</h2>
+    <p class="hint">Builds a complete prompt (template contract + current document + job details) and copies it to the clipboard. Paste it into Claude or any chat LLM, then paste the returned HTML back into the editor.</p>
+    <form method="dialog">
+      <label for="jd-url">Job ad URL</label>
+      <input id="jd-url" type="url" placeholder="https://…" />
+      <label for="jd-text">Job description (paste text — recommended)</label>
+      <textarea id="jd-text" placeholder="Paste the job description here…"></textarea>
+      <label for="company-url">Company website</label>
+      <input id="company-url" type="url" placeholder="https://…" />
+      <label for="notes">Notes for the AI (optional)</label>
+      <textarea id="notes" placeholder="e.g. emphasise Azure and integration work…"></textarea>
+      <div class="actions">
+        <button value="cancel">Cancel</button>
+        <button value="copy" class="primary" id="btn-copy-prompt">Copy prompt</button>
+      </div>
+    </form>
+  </dialog>
+
+</body>
+</html>
