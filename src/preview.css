@@ -14,15 +14,15 @@ body {
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
   font-family: Calibri, 'Segoe UI', sans-serif;
   font-size: 11pt;
-  line-height: 1.08;
+  line-height: 1.16;
   color: #000;
 }
 
 p, h1, h2, ul { margin: 0; }
-p { margin-bottom: 0; min-height: 1.08em; }
+p { margin-bottom: 0.1em; min-height: 1.08em; }
 
 /* Document header: name left (baseline near the block's bottom), contacts right */
-header.cv-header { display: flex; align-items: flex-end; margin-bottom: 0.15em; }
+header.cv-header { display: flex; align-items: flex-end; margin-bottom: 0.35em; }
 header.cv-header h1 { flex: 1; font-size: 28pt; font-weight: normal; line-height: 1; }
 header.cv-header .contact { flex: 1; text-align: right; }
 header.cv-header .contact p { line-height: 1.1; min-height: 0; }
@@ -32,8 +32,9 @@ h2 {
   font-size: 12pt;
   font-weight: bold;
   border-bottom: 0.75pt solid #000;
-  padding-bottom: 1px;
-  margin-top: 0.2em;
+  padding-bottom: 2px;
+  margin-top: 0.55em;
+  margin-bottom: 0.18em;
 }
 
 /* Entry line: bold; tab stops become grid columns (set inline by preview.ts) */
@@ -41,8 +42,11 @@ p.entry { font-weight: bold; }
 p.entry[data-tabs] span { min-width: 0; white-space: nowrap; }
 
 /* Bullets: dot at 0.25in-ish, Word-like breathing room */
-ul { padding-left: 0.5in; list-style: disc; margin: 0.06em 0; }
-li { padding-left: 0.04in; margin-bottom: 0.09em; line-height: 1.15; }
+ul { padding-left: 0.5in; list-style: disc; margin: 0.12em 0 0.3em; }
+li { padding-left: 0.04in; margin-bottom: 0.16em; line-height: 1.2; }
+
+/* Entry lines get a little air above, like Word's rhythm between entries */
+p.entry { margin-top: 0.22em; }
 
 /* Skill grids: proportional columns (grid-template set by preview.ts from data-widths) */
 div.grid { display: grid; column-gap: 0.08in; }
