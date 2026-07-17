@@ -4,6 +4,8 @@
  * dropping content in the DOCX export.
  */
 
+import { parseTabs } from './tabs';
+
 export interface Issue {
   severity: 'error' | 'warning';
   message: string;
@@ -34,32 +36,28 @@ function checkInline(el: Element, issues: Issue[], allowSpan: boolean): void {
 }
 
 function checkNoStyle(root: Element | Document, issues: Issue[]): void {
-  const holder = 'querySelectorAll' in root ? root : root;
-  for (const el of holder.querySelectorAll('[style]')) {
+  for (const el of root.querySelectorAll('[style]')) {
     issues.push({ severity: 'error', message: `Inline style attribute on ${describe(el)} — the contract forbids inline CSS.` });
   }
-  for (const el of holder.querySelectorAll('style, script, img, table, iframe')) {
+  for (const el of root.querySelectorAll('style, script, img, table, iframe')) {
     issues.push({ severity: 'error', message: `Forbidden element ${describe(el)} — not part of the template vocabulary.` });
   }
 }
-
-const TABS_RE = /^\d+(:right|:center)?(\s*,\s*\d+(:right|:center)?)*$/;
 
 function validateEntry(el: Element, issues: Issue[]): void {
   const tabsAttr = el.getAttribute('data-tabs');
   const spans = [...el.children].filter((c) => c.tagName === 'SPAN');
   if (tabsAttr) {
-    if (!TABS_RE.test(tabsAttr.trim())) {
+    const stops = parseTabs(tabsAttr);
+    if (!stops) {
       issues.push({ severity: 'error', message: `Malformed data-tabs="${tabsAttr}" on ${describe(el)} — expected e.g. "4140,10800:right" (twips).` });
       return;
     }
-    const stops = tabsAttr.split(',').length;
-    if (spans.length !== stops + 1) {
-      issues.push({ severity: 'error', message: `${describe(el)} has ${stops} tab stop(s) but ${spans.length} <span>(s) — need exactly ${stops + 1} spans (N stops separate N+1 parts).` });
+    if (spans.length !== stops.length + 1) {
+      issues.push({ severity: 'error', message: `${describe(el)} has ${stops.length} tab stop(s) but ${spans.length} <span>(s) — need exactly ${stops.length + 1} spans (N stops separate N+1 parts).` });
     }
-    for (const stop of tabsAttr.split(',')) {
-      const pos = parseInt(stop, 10);
-      if (pos > 10800) issues.push({ severity: 'warning', message: `Tab stop ${pos} on ${describe(el)} is beyond the 10800-twip printable width.` });
+    for (const stop of stops) {
+      if (stop.pos > 10800) issues.push({ severity: 'warning', message: `Tab stop ${stop.pos} on ${describe(el)} is beyond the 10800-twip printable width.` });
     }
   } else if (spans.length > 1) {
     issues.push({ severity: 'error', message: `${describe(el)} has multiple <span>s but no data-tabs attribute.` });

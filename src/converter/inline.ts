@@ -59,23 +59,33 @@ function collectAtoms(node: Node, style: RunStyle, link: string | undefined, out
   for (const child of el.childNodes) collectAtoms(child, style, link, out);
 }
 
-/** Trim leading/trailing whitespace across the whole atom sequence. */
-function trimAtoms(atoms: Atom[]): Atom[] {
-  const result = atoms.map((a) => ({ ...a }));
-  for (const a of result) {
-    if (a.kind === 'text') {
-      a.text = a.text.replace(/^\s+/, '');
-      if (a.text !== '') break;
+/**
+ * Whitespace normalization the way a browser renders it: trim the sequence
+ * edges, and collapse whitespace that straddles atom boundaries (e.g.
+ * "<strong>foo </strong> bar" is one space, not two) or follows a <br>.
+ */
+function normalizeAtoms(atoms: Atom[]): Atom[] {
+  const result: Atom[] = [];
+  let prevEndsInSpace = true; // sequence start counts as a boundary → leading trim
+  for (const atom of atoms) {
+    if (atom.kind === 'break') {
+      result.push(atom);
+      prevEndsInSpace = true;
+      continue;
     }
+    const text = prevEndsInSpace ? atom.text.replace(/^\s+/, '') : atom.text;
+    if (text === '') continue; // all-whitespace atom: the boundary space carries over
+    prevEndsInSpace = /\s$/.test(text);
+    result.push({ ...atom, text });
   }
   for (let i = result.length - 1; i >= 0; i--) {
     const a = result[i];
-    if (a.kind === 'text') {
-      a.text = a.text.replace(/\s+$/, '');
-      if (a.text !== '') break;
-    }
+    if (a.kind !== 'text') continue;
+    a.text = a.text.replace(/\s+$/, '');
+    if (a.text !== '') break;
+    result.splice(i, 1);
   }
-  return result.filter((a) => a.kind === 'break' || a.text !== '');
+  return result;
 }
 
 function makeRun(atom: Atom): TextRun {
@@ -109,7 +119,7 @@ export function inlineRuns(el: Element, style: RunStyle = {}): InlineChild[] {
     }
   };
 
-  for (const atom of trimAtoms(atoms)) {
+  for (const atom of normalizeAtoms(atoms)) {
     if (atom.link !== undefined) {
       if (!pendingLink || pendingLink.href !== atom.link) {
         flushLink();

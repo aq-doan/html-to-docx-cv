@@ -9,6 +9,7 @@ import { validate } from './validate';
 import { downloadDocx } from './converter';
 import { importDocx } from './importer';
 import { buildPrompt } from './prompt-pack';
+import { escapeHtml } from './escape-html';
 
 type DocId = 'cv' | 'cover-letter';
 
@@ -51,8 +52,9 @@ function refresh(html: string): void {
   }
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Confirm replacing the active document's content; `what` completes the sentence. */
+function confirmReplace(what: string): boolean {
+  return confirm(`Replace the current ${DOCS[active].label} with ${what}? Your edits will be lost.`);
 }
 
 function switchTo(id: DocId): void {
@@ -81,13 +83,13 @@ $('#btn-download').addEventListener('click', async () => {
 });
 
 $('#btn-reset').addEventListener('click', () => {
-  if (confirm(`Replace the current ${DOCS[active].label} with the blank placeholder template? Your edits will be lost.`)) {
+  if (confirmReplace('the blank placeholder template')) {
     editor.setValue(DOCS[active].template);
   }
 });
 
 $('#btn-sample').addEventListener('click', () => {
-  if (confirm(`Replace the current ${DOCS[active].label} with the filled-in sample document? Your edits will be lost.`)) {
+  if (confirmReplace('the filled-in sample document')) {
     editor.setValue(DOCS[active].sample);
   }
 });
@@ -99,7 +101,7 @@ importInput.addEventListener('change', async () => {
   const file = importInput.files?.[0];
   importInput.value = '';
   if (!file) return;
-  if (!confirm(`Replace the current ${DOCS[active].label} with the imported contents of "${file.name}"? Your edits will be lost.`)) {
+  if (!confirmReplace(`the imported contents of "${file.name}"`)) {
     return;
   }
   try {
@@ -134,7 +136,10 @@ dialog.addEventListener('close', async () => {
   }
 });
 
+let flashTimer: number | undefined;
+
 function flashStatus(message: string, isError = false): void {
   status.innerHTML = `<span class="${isError ? 'issue error' : 'ok'}">${escapeHtml(message)}</span>`;
-  window.setTimeout(() => refresh(editor.getValue()), 4000);
+  window.clearTimeout(flashTimer);
+  flashTimer = window.setTimeout(() => refresh(editor.getValue()), 4000);
 }

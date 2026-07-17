@@ -6,6 +6,8 @@
  * through validate.ts, which is the ground truth for what survived.
  */
 
+import { escapeHtml as esc } from '../escape-html';
+
 export interface ImportResult {
   html: string;
   /** Count of body blocks that matched no mapping rule and were dropped. */
@@ -111,10 +113,6 @@ function paragraphAtoms(p: Element, rels: RelMap, link?: string): Atom[] {
     }
   }
   return out;
-}
-
-function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 const plainText = (atoms: Atom[]): string => atoms.map((a) => a.text).join('');

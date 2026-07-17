@@ -4,6 +4,7 @@
  * (CSS alone cannot read attributes into grid-template-columns).
  */
 import previewCss from './preview.css?raw';
+import { parseTabs } from './tabs';
 
 /** Full printable width in twips (must match converter constants). */
 const CONTENT_TWIPS = 10800;
@@ -12,16 +13,13 @@ function withGridColumns(html: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   // Entry lines: lay spans out on a grid whose column edges are the real tab stops.
   for (const entry of doc.querySelectorAll('p.entry[data-tabs]')) {
-    const stops = (entry.getAttribute('data-tabs') ?? '')
-      .split(',')
-      .map((s) => ({ pos: parseInt(s, 10), right: s.includes(':right'), center: s.includes(':center') }))
-      .filter((s) => Number.isFinite(s.pos) && s.pos > 0);
+    const stops = (parseTabs(entry.getAttribute('data-tabs') ?? '') ?? []).filter((s) => s.pos > 0);
     const spans = [...entry.children].filter((c) => c.tagName === 'SPAN') as HTMLElement[];
     if (stops.length === 0 || spans.length !== stops.length + 1) continue;
     // Common Word pattern "middle part centered, last part flush right"
     // (data-tabs="5400:center,10800:right"): equal flex on the outer spans centers
     // the middle one at the page midpoint, exactly like the DOCX center tab stop.
-    if (spans.length === 3 && stops[0].center && stops[1].right) {
+    if (spans.length === 3 && stops[0].align === 'center' && stops[1].align === 'right') {
       (entry as HTMLElement).style.display = 'flex';
       spans[0].style.flex = '1 1 0';
       spans[1].style.flex = 'none';
@@ -33,7 +31,7 @@ function withGridColumns(html: string): string {
     // Flex model: each left stop fixes the width of the span before it; a trailing
     // right stop means the last span ends at that position (right-aligned), with
     // the span before it absorbing the remaining space.
-    const lastRight = stops[stops.length - 1].right;
+    const lastRight = stops[stops.length - 1].align === 'right';
     const fixedStops = lastRight ? stops.slice(0, -1) : stops;
     (entry as HTMLElement).style.display = 'flex';
     let prev = 0;

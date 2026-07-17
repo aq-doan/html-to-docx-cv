@@ -35,6 +35,9 @@ export function createEditor(
     getValue: () => view.state.doc.toString(),
     setValue: (value: string) => {
       view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value } });
+      // The dispatch scheduled a debounced onChange for the same content; call
+      // it once, immediately, instead.
+      window.clearTimeout(timer);
       onChange(value);
     },
   };

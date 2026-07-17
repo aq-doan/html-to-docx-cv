@@ -22,8 +22,16 @@ import {
 } from 'docx';
 import { CONTENT_WIDTH, HEADER_COLS, HEADING_BORDER, LIST, SIZE, TABLE_SPACING } from './constants';
 import { inlineRuns } from './inline';
+import { parseTabs } from '../tabs';
 
 export type Block = Paragraph | Table;
+
+/** TableGrid-style spacing (after 0, single line) for paragraphs inside tables. */
+const TABLE_PARA_SPACING: ISpacingProperties = {
+  after: TABLE_SPACING.AFTER,
+  line: TABLE_SPACING.LINE,
+  lineRule: LineRuleType.AUTO,
+};
 
 /** spacing after=0; optional exact line via data-line (e.g. 240 = single). */
 function tightSpacing(el: Element): ISpacingProperties {
@@ -38,36 +46,20 @@ function tightSpacing(el: Element): ISpacingProperties {
   return spacing;
 }
 
-export interface TabSpec {
-  position: number;
-  type: (typeof TabStopType)[keyof typeof TabStopType];
-}
-
-/** Parse data-tabs="4230,10800:right" → tab stop specs. */
-export function parseTabs(attr: string): TabSpec[] {
-  return attr
-    .split(',')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((part) => {
-      const [pos, align] = part.split(':');
-      const type =
-        align === 'right' ? TabStopType.RIGHT : align === 'center' ? TabStopType.CENTER : TabStopType.LEFT;
-      return { position: parseInt(pos, 10), type };
-    });
-}
+const TAB_TYPE = {
+  left: TabStopType.LEFT,
+  right: TabStopType.RIGHT,
+  center: TabStopType.CENTER,
+} as const;
 
 /** <header class="cv-header"> → 2-col borderless table: 28pt name | right-aligned contacts. */
 function handleHeader(el: Element): Block[] {
   const h1 = el.querySelector('h1');
   const contactPs = el.querySelectorAll('.contact p');
 
-  // Table paragraphs take the TableGrid-style spacing (after 0, single line).
-  const tableSpacing = { after: TABLE_SPACING.AFTER, line: TABLE_SPACING.LINE, lineRule: LineRuleType.AUTO };
-
   const namePara = new Paragraph({
     children: h1 ? inlineRuns(h1, { size: SIZE.NAME }) : [],
-    spacing: tableSpacing,
+    spacing: TABLE_PARA_SPACING,
   });
 
   const contactParas = [...contactPs].map(
@@ -75,7 +67,7 @@ function handleHeader(el: Element): Block[] {
       new Paragraph({
         alignment: AlignmentType.RIGHT,
         children: inlineRuns(p),
-        spacing: tableSpacing,
+        spacing: TABLE_PARA_SPACING,
       }),
   );
 
@@ -128,9 +120,10 @@ function handleH2(el: Element): Block[] {
  */
 function handleEntry(el: Element): Block[] {
   const tabsAttr = el.getAttribute('data-tabs');
+  const tabs = tabsAttr ? parseTabs(tabsAttr) : null;
   const spans = [...el.children].filter((c) => c.tagName === 'SPAN');
 
-  if (!tabsAttr || spans.length === 0) {
+  if (!tabs || spans.length === 0) {
     return [
       new Paragraph({
         children: inlineRuns(el, { bold: true }),
@@ -139,7 +132,6 @@ function handleEntry(el: Element): Block[] {
     ];
   }
 
-  const tabs = parseTabs(tabsAttr);
   const children: ParagraphChild[] = [];
   spans.forEach((span, i) => {
     if (i > 0) children.push(new TextRun({ children: ['\t'] }));
@@ -148,7 +140,7 @@ function handleEntry(el: Element): Block[] {
 
   return [
     new Paragraph({
-      tabStops: tabs.map((t) => ({ type: t.type, position: t.position })),
+      tabStops: tabs.map((t) => ({ type: TAB_TYPE[t.align], position: t.pos })),
       children,
       spacing: tightSpacing(el),
     }),
@@ -161,9 +153,7 @@ function bulletParagraph(li: Element, listEl: Element, inTable = false): Paragra
     style: 'ListParagraph',
     numbering: { reference: 'cv-bullet', level: 0 },
     indent: { left: LIST.PARA_LEFT },
-    spacing: inTable
-      ? { after: TABLE_SPACING.AFTER, line: TABLE_SPACING.LINE, lineRule: LineRuleType.AUTO }
-      : tightSpacing(listEl),
+    spacing: inTable ? TABLE_PARA_SPACING : tightSpacing(listEl),
     children: inlineRuns(li),
   });
 }
