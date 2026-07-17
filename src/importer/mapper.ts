@@ -77,7 +77,10 @@ function runAtoms(r: Element, link: string | undefined, out: Atom[]): void {
   for (const c of r.children) {
     switch (c.localName) {
       case 't':
-        out.push({ kind: 'text', text: c.textContent ?? '', style, link });
+        for (const [i, segment] of (c.textContent ?? '').split('\t').entries()) {
+          if (i > 0) out.push({ kind: 'tab', text: '', style, link });
+          if (segment !== '') out.push({ kind: 'text', text: segment, style, link });
+        }
         break;
       case 'tab':
         out.push({ kind: 'tab', text: '', style, link });
