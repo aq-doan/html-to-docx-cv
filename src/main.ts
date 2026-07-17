@@ -7,6 +7,7 @@ import { createEditor, type Editor } from './editor';
 import { fitPreview, renderPreview } from './preview';
 import { validate } from './validate';
 import { downloadDocx } from './converter';
+import { importDocx } from './importer';
 import { buildPrompt } from './prompt-pack';
 
 type DocId = 'cv' | 'cover-letter';
@@ -88,6 +89,27 @@ $('#btn-reset').addEventListener('click', () => {
 $('#btn-sample').addEventListener('click', () => {
   if (confirm(`Replace the current ${DOCS[active].label} with the filled-in sample document? Your edits will be lost.`)) {
     editor.setValue(DOCS[active].sample);
+  }
+});
+
+const importInput = $<HTMLInputElement>('#import-file');
+$('#btn-import').addEventListener('click', () => importInput.click());
+
+importInput.addEventListener('change', async () => {
+  const file = importInput.files?.[0];
+  importInput.value = '';
+  if (!file) return;
+  if (!confirm(`Replace the current ${DOCS[active].label} with the imported contents of "${file.name}"? Your edits will be lost.`)) {
+    return;
+  }
+  try {
+    const { html, skipped } = await importDocx(file);
+    editor.setValue(html);
+    flashStatus(
+      `✓ Imported ${file.name}${skipped > 0 ? ` — ${skipped} block(s) could not be mapped and were skipped` : ''}. Review the validation results below, then use Copy AI Prompt to tailor it.`,
+    );
+  } catch (err) {
+    flashStatus(`✕ Import failed: ${err instanceof Error ? err.message : String(err)}`, true);
   }
 });
 

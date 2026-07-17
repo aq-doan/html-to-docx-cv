@@ -35,8 +35,15 @@ src/
     index.ts          DOMParser → handlers → docx Document → Packer.toBlob
     handlers.ts       one handler per block construct (header table, h2, entry, grid, ul, p)
     inline.ts         inline DOM → TextRun/ExternalHyperlink (whitespace-collapsing atoms)
+  importer/
+    index.ts          Import DOCX entry: fflate unzip → document.xml + hyperlink rels
+    mapper.ts         heuristic inverse of handlers.ts: Word signals → contract HTML
 scripts/fidelity-check.mjs
 ```
+
+The importer is heuristic and best-effort: imported HTML always goes through
+`validate.ts`, which reports anything the mapping couldn't classify. The forward
+converter remains the ground truth for the vocabulary.
 
 ## The one invariant that matters
 
