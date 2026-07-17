@@ -16,7 +16,7 @@ Requires [Node.js](https://nodejs.org) 18+.
 git clone https://github.com/aq-doan/html-to-docx-cv.git
 cd html-to-docx-cv
 npm install
-npm run dev        # → http://localhost:5173
+npm run dev        # → http://localhost:3000
 ```
 
 ## Usage
@@ -24,8 +24,9 @@ npm run dev        # → http://localhost:5173
 1. **Pick a tab** — CV or Cover Letter. Each is edited and saved (localStorage)
    independently.
 2. **Start writing** — the editor opens with a placeholder template
-   (`Your Name`, `Company Name`, …). Replace the placeholders with your details, or
-   click **Load sample** to see a fully written example document first.
+   (`Your Name`, `Company Name`, …). Replace the placeholders with your details,
+   click **Load sample** to see a fully written example document first, or click
+   **Import DOCX** to start from an existing Word CV (see below).
 3. **Watch the preview** — the right pane renders an approximate print view as you
    type. The DOCX export is the ground truth; the preview is for orientation.
 4. **Fix validation issues** — the bar under the editor checks every change against
@@ -36,6 +37,27 @@ npm run dev        # → http://localhost:5173
 
 Buttons: **Load sample** replaces the editor with the example document;
 **Reset template** restores the blank placeholder template.
+
+### Importing an existing Word CV
+
+Click **Import DOCX** and pick a `.docx` file. The app transcribes it into the
+template vocabulary — entirely in the browser, nothing is uploaded — and replaces the
+active tab's content (you are asked to confirm first). Word structures are recognised
+by the same signals the exporter emits: headings with bottom borders become `<h2>`,
+tab-stop lines become `<p class="entry" data-tabs="…">`, bulleted lists become
+`<ul>`, borderless multi-column tables become skill grids, and the two-column name
+block becomes the header.
+
+The mapping is heuristic and best-effort:
+
+- The validation bar reports anything that couldn't be classified — review it and fix
+  by hand before exporting.
+- Blocks with no equivalent in the vocabulary (images, decorated tables, …) are
+  skipped; the status bar tells you how many.
+- A round trip (Download DOCX → Import DOCX) of a contract-clean document is lossless.
+
+Importing is the natural entry point for the AI workflow: import your current CV,
+then use **Copy AI Prompt** to tailor it to a job description.
 
 ### Tailoring with AI
 
