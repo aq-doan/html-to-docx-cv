@@ -89,5 +89,7 @@ don't chase pixel equality there — chase it in the DOCX.
   keystroke) but must agree with it — when in doubt, the converter's dispatch rules in
   `handlers.ts` are the source of truth for what renders.
 - User content is escaped before any `innerHTML` in `main.ts`; keep it that way.
-- Sample templates contain the repo owner's real CV data — that's intentional (they use
-  the app for themselves); placeholder templates are what new users start from.
+- Sample templates (`sample-cv.html`, `sample-cover-letter.html`) are fictional example
+  documents (persona: Jordan Avery Mitchell) that demonstrate the full vocabulary end to
+  end; placeholder templates (`cv.html`, `cover-letter.html`) are the blank base new
+  users start from. Keep sample data fictional — no real people or organisations.

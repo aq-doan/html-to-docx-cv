@@ -1,6 +1,6 @@
 /**
  * Styling constants transcribed from the reference DOCX
- * (Anh Quan Doan_CV_MyStateBank.docx — word/document.xml, styles.xml, numbering.xml).
+ * (word/document.xml, styles.xml, numbering.xml).
  * All positions/widths in twips (1440/inch), font sizes in half-points.
  */
 
