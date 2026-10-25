@@ -281,6 +281,7 @@ function isHeaderTable(tbl: Element): boolean {
   return descendants(tbl, 'sz').some((sz) => parseInt(attr(sz, 'val') ?? '0', 10) >= NAME_SIZE_MIN);
 }
 
+
 /** In the contact block, wrap bare emails/URLs so they survive as hyperlinks. */
 function autoLink(html: string, raw: string): string {
   if (html.includes('<a ')) return html;
